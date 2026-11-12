@@ -1,0 +1,101 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>لوحة المسؤول الرئيسي</title>
+<link rel="manifest" href="admin.webmanifest"><link rel="icon" href="admin-192.png"><link rel="apple-touch-icon" href="admin-180.png"><meta name="theme-color" content="#0F2A2E"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="مسؤول العربيات">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#F4F6F3;--card:#fff;--ink:#0F2A2E;--mut:#5d6f6b;--line:#D5DDD9;--go:#1B9A6C;--amb:#F5B335;--red:#B3261E}
+@media(prefers-color-scheme:dark){:root{--bg:#0C1A1D;--card:#142A2E;--ink:#E8F0EE;--mut:#9DB0AB;--line:#2A4247}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;line-height:1.6}
+.w{max-width:720px;margin:0 auto;padding:16px}h1{font-size:22px;margin:0}h3{margin:0 0 4px}.mut{color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+button,select,input,textarea{font:inherit;color:var(--ink)}
+button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 13px;font-weight:600;cursor:pointer}
+button.go{background:var(--go);border-color:var(--go);color:#fff}button.red{background:var(--red);border-color:var(--red);color:#fff}button:disabled{opacity:.4}
+:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-top:4px}
+label{display:block;font-weight:600;font-size:14px;margin-top:10px}
+.bus{border-top:1px solid var(--line);padding:12px 0}.bus:first-child{border-top:0}
+.lnk{direction:ltr;text-align:left;font-size:12px;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:6px 0}
+.bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.bt button{padding:6px 10px;font-size:14px}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:0 9px;margin-inline-start:6px}.tag.off{background:var(--red);color:#fff;border-color:var(--red)}
+#toast{position:fixed;inset-inline:16px;bottom:16px;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;font-weight:600;display:none;z-index:9;max-width:688px;margin:auto}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);width:min(92vw,440px)}dialog::backdrop{background:rgba(0,0,0,.5)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+</style></head><body><div class="w">
+<h1>لوحة المسؤول الرئيسي</h1><div class="mut">إنشاء العربيات والتحكم فيها. الصفحة دي ليك أنت بس، متبعتش رابطها لحد.</div>
+
+<div class="card" id="lg"><b>دخول</b><label for="pw">باسورد المسؤول الرئيسي</label><input id="pw" type="password" autocomplete="off">
+<button class="go" id="lgb" style="width:100%;margin-top:12px">دخول</button></div>
+
+<div id="main" hidden>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>العربيات</b><span><button id="ref">تحديث</button> <button id="chpw">تغيير باسوردي</button> <button id="out">خروج</button></span></div>
+<div id="list"><p class="mut">جارٍ التحميل…</p></div></div>
+
+<div class="card"><b>إضافة عربية جديدة</b>
+<label>اسم العربية<input id="n" placeholder="مثال: رحلة الصبح - المعادي"></label>
+<label>نوع العربية<select id="md"><option value="limited">محدودة - بالأسبقية للحجز وحد للمقاعد (احتياطي بعد اكتمال العدد)</option><option value="open">عادية - بدون قيود: بدون حد للمقاعد، ويقدر نفس الموبايل يحجز أكتر من مرة (للأسر)</option></select></label>
+<div class="g2"><label id="sl">عدد المقاعد<input id="s" type="number" min="1" max="60" value="14" inputmode="numeric"></label>
+<label>باسورد السائق (6 أحرف+)<input id="dp" type="text" autocomplete="off"></label></div>
+<label>محطات الركوب بالترتيب (كل محطة في سطر)<textarea id="pk" rows="6" placeholder="المحطة الأولى&#10;المحطة التانية"></textarea></label>
+<label>محطات النزول (كل محطة في سطر) - اختياري<textarea id="dr" rows="5"></textarea></label>
+<button class="go" id="mk" style="width:100%;margin-top:12px">إنشاء العربية</button></div>
+</div>
+</div>
+<dialog id="dlg"><form id="dform" method="dialog"><h3 id="dt"></h3><div id="df"></div><div class="g2"><button class="go" id="dok">حفظ</button><button value="cancel" formnovalidate>إلغاء</button></div></form></dialog>
+<div id="toast" role="status"></div>
+<script>
+const SUPABASE_URL='https://tuyntqjoxrajazbpwbuf.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_0PyF3E2PMaV1Engulyt7zQ_E19y9YQH';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const $=i=>document.getElementById(i),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let PW='',BUSES=[];
+try{PW=sessionStorage.getItem('mpw')||''}catch(e){}
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',4500)}
+const link=s=>new URL('index.html',location.href).href.split('?')[0]+'?b='+s;
+const fmt=iso=>iso?new Date(iso).toLocaleString('ar-EG',{timeZone:'Africa/Cairo',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+const stTxt={open:'الحجز',going:'الرحلة ماشية',done:'الرحلة انتهت'};
+
+async function call(fn,args,ok){const {data,error}=await sb.rpc(fn,{p_pw:PW,...args});
+ if(error){toast(error.message);if(error.message.includes('كلمة المرور غير صحيحة'))out();return null}
+ if(ok)toast(ok);return {data}}
+function out(){PW='';try{sessionStorage.removeItem('mpw')}catch(e){}$('lg').hidden=false;$('main').hidden=true}
+async function enter(){const {data,error}=await sb.rpc('master_login',{p_pw:PW});
+ if(error){toast('خطأ في الاتصال: '+error.message);return 'err'}
+ if(!data){out();return false}
+ $('lg').hidden=true;$('main').hidden=false;await refresh();return true}
+$('lgb').onclick=async()=>{PW=$('pw').value;const r=await enter();if(r===true){try{sessionStorage.setItem('mpw',PW)}catch(e){}$('pw').value=''}else if(r===false)toast('كلمة المرور غير صحيحة')};
+$('pw').onkeydown=e=>{if(e.key==='Enter')$('lgb').click()};
+$('out').onclick=out;$('ref').onclick=refresh;
+
+async function refresh(){const r=await call('master_list',{});if(!r)return;BUSES=r.data;
+ $('list').innerHTML=BUSES.length?BUSES.map(b=>`<div class="bus"><b>${esc(b.name)}</b><span class="tag">${b.mode==='open'?'عادية - بدون قيود':b.seats+' مقعد - محدودة'}</span>${b.active?'':'<span class="tag off">متوقفة</span>'}
+  <div class="mut">${b.bookings} حجز - ${stTxt[b.status]||''}${b.status==='open'?(b.open_at?` (من ${esc(fmt(b.open_at))} إلى ${esc(fmt(b.close_at))})`:' - مفيش موعد محدد'):''}</div>
+  <div class="lnk">${esc(link(b.slug))}</div>
+  <div class="bt"><button class="go" data-a="open" data-i="${b.id}">فتح والتحكم</button><button data-a="copy" data-i="${b.id}">نسخ الرابط</button><button data-a="edit" data-i="${b.id}">تعديل</button><button data-a="dpw" data-i="${b.id}">باسورد السائق</button><button class="red" data-a="regen" data-i="${b.id}">رابط جديد</button></div></div>`).join(''):'<p class="mut">مفيش عربيات لسه. أضف أول عربية من تحت.</p>'}
+
+function form(title,fields,ok){$('dt').textContent=title;
+ $('df').innerHTML=fields.map(f=>f.t==='sel'?`<label>${f.l}<select name="${f.k}">${f.o.map(o=>`<option value="${o[0]}" ${o[0]==f.v?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`:`<label>${f.l}<input name="${f.k}" type="${f.t||'text'}" value="${esc(f.v??'')}" ${f.t==='number'?'min="1" max="60"':''}></label>`).join('');
+ $('dok').onclick=e=>{e.preventDefault();const v={};new FormData($('dform')).forEach((x,k)=>v[k]=x);$('dlg').close();ok(v)};$('dlg').showModal()}
+
+$('list').onclick=async e=>{const b=e.target.closest('button[data-a]');if(!b)return;const x=BUSES.find(y=>y.id===+b.dataset.i),a=b.dataset.a;
+ if(a==='open')location.href=link(x.slug);
+ if(a==='copy'){try{await navigator.clipboard.writeText(link(x.slug));toast('تم نسخ الرابط')}catch(er){prompt('انسخ الرابط',link(x.slug))}}
+ if(a==='edit')form('تعديل العربية',[{k:'n',l:'الاسم',v:x.name},{k:'m',l:'نوع العربية',t:'sel',o:[['limited','محدودة (بالأسبقية)'],['open','عادية (بدون قيود)']],v:x.mode||'limited'},{k:'s',l:'عدد المقاعد (للمحدودة فقط)',t:'number',v:x.seats},{k:'a',l:'الحالة',t:'sel',o:[['0','شغّالة'],['1','متوقفة (الرابط بيقفل)']],v:x.active?'0':'1'}],async v=>{
+   const r=await call('master_update_bus',{p_id:x.id,p_name:v.n,p_seats:+v.s,p_active:v.a!=='1',p_mode:v.m},'تم التعديل');if(r)refresh()});
+ if(a==='dpw')form('باسورد سائق: '+x.name,[{k:'p',l:'الباسورد الجديد (6 أحرف+)',t:'password',v:''}],async v=>{
+   const r=await call('master_set_bus_pw',{p_id:x.id,p_newpw:v.p},'تم تغيير الباسورد');if(r)refresh()});
+ if(a==='regen'&&confirm('الرابط القديم هيبطل يشتغل نهائي. تكمل؟')){const r=await call('master_regen_slug',{p_id:x.id},'تم عمل رابط جديد، ابعته للركاب والسائق');if(r)refresh()}};
+
+$('mk').onclick=async()=>{const lines=t=>$(t).value.split('\n').map(s=>s.trim()).filter(Boolean);
+ const n=$('n').value.trim(),md=$('md').value,s=md==='open'?14:+$('s').value,pk=lines('pk'),dr=lines('dr');
+ if(n.length<2)return toast('اكتب اسم العربية');if(!(s>=1&&s<=60))return toast('عدد المقاعد من 1 لـ 60');if(pk.length<1)return toast('ضيف محطة ركوب واحدة على الأقل');
+ const r=await call('master_create_bus',{p_name:n,p_mode:md,p_seats:s,p_driver_pw:$('dp').value,p_pickups:pk,p_drops:dr},'تم إنشاء العربية');
+ if(r){['n','dp','pk','dr'].forEach(i=>$(i).value='');$('s').value=14;$('md').value='limited';$('sl').hidden=false;await refresh()}};
+$('md').onchange=()=>{$('sl').hidden=$('md').value==='open'};
+
+$('chpw').onclick=()=>form('تغيير باسورد المسؤول الرئيسي (10 أحرف+)',[{k:'p',l:'الباسورد الجديد',t:'password',v:''}],async v=>{
+ const r=await call('master_set_pw',{p_newpw:v.p});if(r){PW=v.p;try{sessionStorage.setItem('mpw',PW)}catch(e){}toast('تم تغيير الباسورد')}});
+
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(PW)enter();
+</script></body></html>
